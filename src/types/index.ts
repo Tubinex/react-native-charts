@@ -12,9 +12,9 @@ export interface ChartSegment {
 	label?: string;
 }
 
-export interface DonutChartSegment extends ChartSegment {}
+export interface DonutChartSegment extends ChartSegment { }
 
-export interface SemiCircleChartSegment extends ChartSegment {}
+export interface SemiCircleChartSegment extends ChartSegment { }
 
 export interface GaugeSegment {
 	value: number;
@@ -29,6 +29,68 @@ export interface BarData {
 	showValue?: boolean;
 }
 
+export type CornerRadiusTopBottom = {
+	top: number;
+	bottom: number;
+};
+
+export type CornerRadiusFull = {
+	topLeft: number;
+	topRight: number;
+	bottomLeft: number;
+	bottomRight: number;
+};
+
+export type CornerRadius = number | CornerRadiusTopBottom | CornerRadiusFull;
+
+export interface AxisConfig {
+	show?: boolean;
+	color?: string;
+	width?: number;
+	ticks?: {
+		show?: boolean;
+		count?: number;
+		values?: (string | number)[];
+		color?: string;
+		width?: number;
+		length?: number;
+	};
+	labels?: {
+		show?: boolean;
+		formatter?: (value: number | string, index: number) => string;
+		color?: string;
+		fontSize?: number;
+		fontWeight?: 'normal' | 'bold' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900';
+		rotation?: number;
+	};
+	grid?: {
+		show?: boolean;
+		color?: string;
+		width?: number;
+		dashArray?: number[];
+	};
+}
+
+export interface GroupedBarData {
+	category: string;
+	bars: {
+		value: number;
+		color: string;
+		label?: string;
+	}[];
+}
+
+export interface StackedBarData {
+	category: string;
+	stack: {
+		value: number;
+		color: string;
+		label?: string;
+	}[];
+}
+
+export type SelectionExpandMode = 'scale' | 'expand';
+
 export interface RadialGraphProps {
 	segments: RadialSegment[];
 	maxValue?: number;
@@ -42,15 +104,14 @@ export interface RadialGraphProps {
 	sweepAngle?: number;
 	viewBoxHeightRatio?: number;
 	centerContent?: React.ReactNode;
-	closedLoop?: boolean;
 	contentAlignment?: ContentAlignment;
 	onSegmentPress?: (index: number) => void;
 	selectedSegmentIndex?: number;
 	selectedStrokeWidthIncrease?: number;
 	selectionAnimationDuration?: number;
-	allowTapWhenNoSelection?: boolean;
-	tapGestureMaxDist?: number;
-	tapGestureMaxDurationMs?: number;
+	selectionExpandMode?: SelectionExpandMode;
+	onPressOutside?: () => void;
+	chartGestureRef?: React.RefObject<any>;
 }
 
 export interface DonutChartProps {
@@ -66,7 +127,8 @@ export interface DonutChartProps {
 	selectedSegmentIndex?: number;
 	selectedStrokeWidthIncrease?: number;
 	selectionAnimationDuration?: number;
-	allowTapWhenNoSelection?: boolean;
+	onPressOutside?: () => void;
+	chartGestureRef?: React.RefObject<any>;
 }
 
 export interface SemiCircleChartProps {
@@ -84,7 +146,8 @@ export interface SemiCircleChartProps {
 	selectedSegmentIndex?: number;
 	selectedStrokeWidthIncrease?: number;
 	selectionAnimationDuration?: number;
-	allowTapWhenNoSelection?: boolean;
+	onPressOutside?: () => void;
+	chartGestureRef?: React.RefObject<any>;
 }
 
 export interface RadialGaugeProps {
@@ -125,20 +188,90 @@ export interface SemiCircleGaugeProps {
 	contentAlignment?: ContentAlignment;
 }
 
+export interface GroupedStackedBarChartProps {
+	data: (GroupedBarData | StackedBarData)[];
+	width?: number;
+	height?: number;
+	barColor?: string;
+	cornerRadius?: CornerRadius;
+	barGap?: number;
+	groupGap?: number;
+	showValues?: boolean;
+	valueFormatter?: (value: number) => string;
+	animationDuration?: number;
+	maxValue?: number;
+	xAxis?: AxisConfig;
+	yAxis?: AxisConfig;
+	onBarPress?: (categoryIndex: number, barIndex?: number) => void;
+	selectedBar?: { categoryIndex: number; barIndex?: number };
+	selectedBarColor?: string;
+	selectedBarScale?: number;
+	selectionAnimationDuration?: number;
+	onPressOutside?: () => void;
+	chartGestureRef?: React.RefObject<any>;
+}
+
 export interface BarChartProps {
 	data: BarData[];
 	width?: number;
 	height?: number;
 	barColor?: string;
-	cornerRadius?: number;
+	cornerRadius?: CornerRadius;
 	barGap?: number;
 	showValues?: boolean;
 	valueFormatter?: (value: number) => string;
 	animationDuration?: number;
 	maxValue?: number;
-	showYAxis?: boolean;
-	yAxisTicks?: number;
+	xAxis?: AxisConfig;
+	yAxis?: AxisConfig;
 	onBarPress?: (index: number) => void;
 	selectedBarIndex?: number;
 	selectedBarColor?: string;
+	selectedBarScale?: number;
+	selectionAnimationDuration?: number;
+	onPressOutside?: () => void;
+	chartGestureRef?: React.RefObject<any>;
+}
+
+export interface GroupedBarChartProps {
+	data: GroupedBarData[];
+	width?: number;
+	height?: number;
+	cornerRadius?: CornerRadius;
+	barGap?: number;
+	groupGap?: number;
+	showValues?: boolean;
+	valueFormatter?: (value: number) => string;
+	animationDuration?: number;
+	maxValue?: number;
+	xAxis?: AxisConfig;
+	yAxis?: AxisConfig;
+	onBarPress?: (categoryIndex: number, barIndex: number) => void;
+	selectedBar?: { categoryIndex: number; barIndex: number };
+	selectedBarColor?: string;
+	selectedBarScale?: number;
+	selectionAnimationDuration?: number;
+	onPressOutside?: () => void;
+	chartGestureRef?: React.RefObject<any>;
+}
+
+export interface StackedBarChartProps {
+	data: StackedBarData[];
+	width?: number;
+	height?: number;
+	cornerRadius?: CornerRadius;
+	barGap?: number;
+	showValues?: boolean;
+	valueFormatter?: (value: number) => string;
+	animationDuration?: number;
+	maxValue?: number;
+	xAxis?: AxisConfig;
+	yAxis?: AxisConfig;
+	onBarPress?: (categoryIndex: number, segmentIndex?: number) => void;
+	selectedBar?: { categoryIndex: number; segmentIndex?: number };
+	selectedBarColor?: string;
+	selectedBarScale?: number;
+	selectionAnimationDuration?: number;
+	onPressOutside?: () => void;
+	chartGestureRef?: React.RefObject<any>;
 }

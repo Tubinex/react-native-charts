@@ -1,13 +1,9 @@
-/**
- * @tubinex/react-native-charts
- * A collection of beautiful, customizable chart components for React Native
- *
- * @packageDocumentation
- */
-
 export { RadialChart } from './components/charts/RadialChart';
 
 export { BarChart } from './components/charts/BarChart';
+export { GroupedStackedBarChart } from './components/charts/GroupedStackedBarChart';
+export { StackedBarChart } from './components/charts/StackedBarChart';
+export { GroupedBarChart } from './components/charts/GroupedBarChart';
 export { DonutChart } from './components/charts/DonutChart';
 export { SemiCircleChart } from './components/charts/SemiCircleChart';
 
@@ -29,5 +25,12 @@ export type {
 	GaugeSegment,
 	BarChartProps,
 	BarData,
+	GroupedStackedBarChartProps,
+	GroupedBarChartProps,
+	StackedBarChartProps,
+	GroupedBarData,
+	StackedBarData,
+	CornerRadius,
+	AxisConfig,
 	ContentAlignment,
 } from './types';

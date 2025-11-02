@@ -1,10 +1,6 @@
 import React, { useEffect, useCallback, useRef } from 'react';
-import { View, StyleSheet } from 'react-native';
-import {
-	TapGestureHandler,
-	State,
-	type TapGestureHandlerStateChangeEvent,
-} from 'react-native-gesture-handler';
+import { View, StyleSheet, type GestureResponderEvent } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Svg, { Path, G } from 'react-native-svg';
 import Animated, {
 	useSharedValue,
@@ -13,7 +9,8 @@ import Animated, {
 	Easing,
 	type SharedValue,
 } from 'react-native-reanimated';
-import type { RadialGraphProps, RadialSegment } from '../../types';
+import { scheduleOnRN } from 'react-native-worklets';
+import type { RadialGraphProps } from '../../types';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
@@ -55,15 +52,14 @@ export const RadialChart: React.FC<RadialGraphProps> = ({
 	sweepAngle = 360,
 	viewBoxHeightRatio = 1,
 	centerContent,
-	closedLoop = false,
 	contentAlignment = 'center',
 	onSegmentPress,
 	selectedSegmentIndex = -1,
 	selectedStrokeWidthIncrease = 15,
 	selectionAnimationDuration = 200,
-	allowTapWhenNoSelection = true,
-	tapGestureMaxDist = 18,
-	tapGestureMaxDurationMs = 280,
+	selectionExpandMode = 'expand',
+	onPressOutside,
+	chartGestureRef,
 }) => {
 	const progress = useSharedValue(0);
 	useEffect(() => {
@@ -74,8 +70,10 @@ export const RadialChart: React.FC<RadialGraphProps> = ({
 	}, [animationDuration]);
 
 	const expandedStrokeWidth = strokeWidth + selectedStrokeWidthIncrease;
-
-	const padding = selectedStrokeWidthIncrease / 2;
+	const padding =
+		selectionExpandMode === 'expand'
+			? selectedStrokeWidthIncrease
+			: selectedStrokeWidthIncrease / 2;
 	const effectiveSize = size + padding * 2;
 
 	const radius = (size - strokeWidth) / 2;
@@ -94,6 +92,7 @@ export const RadialChart: React.FC<RadialGraphProps> = ({
 	const hasGap = segmentGap > 0;
 	const needsBackgroundSegment = percentage < 100 && backgroundColor;
 	const totalSegments = segments.length + (needsBackgroundSegment ? 1 : 0);
+	const closedLoop = Math.abs(sweepAngle) >= 360;
 	const numGaps = closedLoop && hasGap ? totalSegments : Math.max(0, totalSegments - 1);
 	const totalGapDegrees = hasGap ? segmentGap * numGaps : 0;
 	const availableDegrees = sweepAngle - totalGapDegrees;
@@ -126,12 +125,12 @@ export const RadialChart: React.FC<RadialGraphProps> = ({
 	const backgroundPercentage = needsBackgroundSegment ? 1 - percentage / 100 : 0;
 	const backgroundSegment = needsBackgroundSegment
 		? {
-				startAngle: currentAngle,
-				sweepAngle: startAngle + sweepAngle - currentAngle,
-				color: backgroundColor!,
-				animationStart: cumulativePercentage,
-				animationEnd: cumulativePercentage + backgroundPercentage,
-			}
+			startAngle: currentAngle,
+			sweepAngle: startAngle + sweepAngle - currentAngle,
+			color: backgroundColor!,
+			animationStart: cumulativePercentage,
+			animationEnd: cumulativePercentage + backgroundPercentage,
+		}
 		: null;
 
 	const innerRadius = radius - strokeWidth / 2;
@@ -168,27 +167,31 @@ export const RadialChart: React.FC<RadialGraphProps> = ({
 		[center, innerHitRadius, outerHitRadius, segmentData]
 	);
 
-	const tapStartRef = useRef<{ x: number; y: number } | null>(null);
+	const tapStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
+	const deselectTouchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
-	const handleTapGesture = useCallback(
-		(event: TapGestureHandlerStateChangeEvent) => {
+	const handleSegmentTap = useCallback(
+		(x: number, y: number) => {
+			const index = getSegmentIndexForPoint(x, y);
+			if (index !== -1 && onSegmentPress) {
+				onSegmentPress(index);
+			}
+		},
+		[getSegmentIndexForPoint, onSegmentPress]
+	);
+
+	const hasInteractiveSegments = segmentData.some(segment => segment.sweepAngle > 0);
+
+	let tapGesture = Gesture.Tap()
+		.enabled(!!onSegmentPress && hasInteractiveSegments)
+		.maxDistance(18)
+		.maxDuration(280)
+		.onBegin(event => {
+			tapStartRef.current = { x: event.x, y: event.y, time: Date.now() };
+		})
+		.onEnd(event => {
+			'worklet';
 			if (!onSegmentPress) {
-				return;
-			}
-
-			const { state, oldState, x, y } = event.nativeEvent;
-
-			if (state === State.BEGAN) {
-				tapStartRef.current = { x, y };
-				return;
-			}
-
-			if (state === State.CANCELLED || state === State.FAILED) {
-				tapStartRef.current = null;
-				return;
-			}
-
-			if (!(state === State.END && oldState === State.ACTIVE)) {
 				return;
 			}
 
@@ -196,26 +199,76 @@ export const RadialChart: React.FC<RadialGraphProps> = ({
 			tapStartRef.current = null;
 
 			if (start) {
-				const dx = x - start.x;
-				const dy = y - start.y;
-				if (dx * dx + dy * dy > tapGestureMaxDist * tapGestureMaxDist) {
+				const dx = event.x - start.x;
+				const dy = event.y - start.y;
+				const distSquared = dx * dx + dy * dy;
+
+				if (distSquared > 18 * 18) {
+					return;
+				}
+
+				if (Math.abs(dy) > Math.abs(dx) * 1.5 && Math.abs(dy) > 5) {
 					return;
 				}
 			}
 
-			const index = getSegmentIndexForPoint(x, y);
-			if (index !== -1) {
-				onSegmentPress(index);
+			scheduleOnRN(handleSegmentTap, event.x, event.y);
+		})
+		.onFinalize(() => {
+			tapStartRef.current = null;
+		});
+
+	if (chartGestureRef) {
+		tapGesture = tapGesture.withRef(chartGestureRef);
+	}
+
+	const handleTouchStart = useCallback(
+		(event: GestureResponderEvent) => {
+			if (!onPressOutside || selectedSegmentIndex === -1) {
+				return;
 			}
+			const { locationX, locationY } = event.nativeEvent;
+			deselectTouchStartRef.current = { x: locationX, y: locationY, time: Date.now() };
 		},
-		[getSegmentIndexForPoint, onSegmentPress, tapGestureMaxDist]
+		[onPressOutside, selectedSegmentIndex]
 	);
 
-	const hasInteractiveSegments = segmentData.some(segment => segment.sweepAngle > 0);
-	const tapGestureEnabled =
-		!!onSegmentPress &&
-		hasInteractiveSegments &&
-		(allowTapWhenNoSelection || selectedSegmentIndex !== -1);
+	const handleTouchEnd = useCallback(
+		(event: GestureResponderEvent) => {
+			if (!onPressOutside || selectedSegmentIndex === -1) {
+				return;
+			}
+
+			const start = deselectTouchStartRef.current;
+			deselectTouchStartRef.current = null;
+
+			if (!start) {
+				return;
+			}
+
+			const { locationX, locationY } = event.nativeEvent;
+			const dx = locationX - start.x;
+			const dy = locationY - start.y;
+			const distance = Math.sqrt(dx * dx + dy * dy);
+			const duration = Date.now() - start.time;
+
+			if (distance < 18 && duration < 280) {
+				const index = getSegmentIndexForPoint(locationX, locationY);
+				if (index === -1) {
+					setTimeout(() => {
+						onPressOutside();
+					}, 10);
+				}
+			}
+		},
+		[
+			onPressOutside,
+			selectedSegmentIndex,
+			getSegmentIndexForPoint,
+		]
+	);
+
+	const deselectTouchEnabled = !!onPressOutside && selectedSegmentIndex !== -1;
 
 	const getContentBoxStyle = () => {
 		if (sweepAngle === 360) {
@@ -252,17 +305,20 @@ export const RadialChart: React.FC<RadialGraphProps> = ({
 		}
 	};
 
-	return (
-		<View style={[styles.container, { width: effectiveSize, height: viewBoxHeight }]}>
-			<TapGestureHandler
-				enabled={tapGestureEnabled}
-				maxDist={tapGestureMaxDist}
-				maxDeltaX={tapGestureMaxDist}
-				maxDeltaY={tapGestureMaxDist}
-				maxDurationMs={tapGestureMaxDurationMs}
-				shouldCancelWhenOutside
-				onHandlerStateChange={handleTapGesture}
-			>
+	const chartContent = (
+		<View
+			style={[
+				styles.container,
+				{
+					width: effectiveSize,
+					height: viewBoxHeight,
+					margin: -padding,
+				},
+			]}
+			onTouchStart={deselectTouchEnabled ? handleTouchStart : undefined}
+			onTouchEnd={deselectTouchEnabled ? handleTouchEnd : undefined}
+		>
+			<GestureDetector gesture={tapGesture}>
 				<Svg
 					width={effectiveSize}
 					height={viewBoxHeight}
@@ -297,6 +353,7 @@ export const RadialChart: React.FC<RadialGraphProps> = ({
 								progress={progress}
 								isSelected={segment.isSelected}
 								selectionAnimationDuration={selectionAnimationDuration}
+								selectionExpandMode={selectionExpandMode}
 								animationDuration={animationDuration}
 								animationStart={segment.animationStart}
 								animationEnd={segment.animationEnd}
@@ -321,7 +378,7 @@ export const RadialChart: React.FC<RadialGraphProps> = ({
 						)}
 					</G>
 				</Svg>
-			</TapGestureHandler>
+			</GestureDetector>
 			{centerContent && (
 				<View
 					style={[
@@ -335,6 +392,8 @@ export const RadialChart: React.FC<RadialGraphProps> = ({
 			)}
 		</View>
 	);
+
+	return chartContent;
 };
 
 interface RadialSegmentPathProps {
@@ -423,6 +482,7 @@ interface AnimatedRadialSegmentProps {
 	selectedStrokeWidth?: number;
 	isSelected?: boolean;
 	selectionAnimationDuration?: number;
+	selectionExpandMode?: 'scale' | 'expand';
 }
 
 const AnimatedRadialSegment: React.FC<AnimatedRadialSegmentProps> = ({
@@ -442,6 +502,7 @@ const AnimatedRadialSegment: React.FC<AnimatedRadialSegmentProps> = ({
 	selectedStrokeWidth,
 	isSelected = false,
 	selectionAnimationDuration = 200,
+	selectionExpandMode = 'expand',
 }) => {
 	const isSelectionSegment = baseStrokeWidth !== undefined && selectedStrokeWidth !== undefined;
 	const segmentProgress = useSharedValue(0);
@@ -497,17 +558,21 @@ const AnimatedRadialSegment: React.FC<AnimatedRadialSegmentProps> = ({
 		}
 
 		let currentStrokeWidth: number;
+		let currentRadius = radius;
 
 		if (isSelectionSegment) {
 			const selProg = mySelectionProgress.value;
-			currentStrokeWidth =
-				baseStrokeWidth! + (selectedStrokeWidth! - baseStrokeWidth!) * selProg;
+			const strokeWidthIncrease = selectedStrokeWidth! - baseStrokeWidth!;
+			currentStrokeWidth = baseStrokeWidth! + strokeWidthIncrease * selProg;
+			if (selectionExpandMode === 'expand') {
+				currentRadius = radius + (strokeWidthIncrease / 2) * selProg;
+			}
 		} else {
 			currentStrokeWidth = staticStrokeWidth!;
 		}
 
-		const outerRadius = radius + currentStrokeWidth / 2;
-		const innerRadius = radius - currentStrokeWidth / 2;
+		const outerRadius = currentRadius + currentStrokeWidth / 2;
+		const innerRadius = currentRadius - currentStrokeWidth / 2;
 		const maxCornerRadius = Math.min(cornerRadius, currentStrokeWidth / 2 - 1);
 
 		const endAngle = startAngle + currentSweep;

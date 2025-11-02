@@ -36,7 +36,6 @@ export const DonutGauge: React.FC<DonutGaugeProps> = ({
 			sweepAngle={360}
 			viewBoxHeightRatio={1}
 			centerContent={centerContent}
-			closedLoop={false}
 			contentAlignment="center"
 		/>
 	);

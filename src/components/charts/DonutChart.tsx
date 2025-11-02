@@ -12,10 +12,11 @@ export const DonutChart: React.FC<DonutChartProps> = ({
 	animationDuration = 1200,
 	selectedStrokeWidthIncrease,
 	selectionAnimationDuration,
-	allowTapWhenNoSelection,
 	centerContent,
 	onSegmentPress,
 	selectedSegmentIndex,
+	onPressOutside,
+	chartGestureRef,
 }) => {
 	return (
 		<RadialChart
@@ -30,12 +31,12 @@ export const DonutChart: React.FC<DonutChartProps> = ({
 			sweepAngle={360}
 			viewBoxHeightRatio={1}
 			centerContent={centerContent}
-			closedLoop={true}
 			onSegmentPress={onSegmentPress}
 			selectedSegmentIndex={selectedSegmentIndex}
 			selectedStrokeWidthIncrease={selectedStrokeWidthIncrease}
 			selectionAnimationDuration={selectionAnimationDuration}
-			allowTapWhenNoSelection={allowTapWhenNoSelection}
+			onPressOutside={onPressOutside}
+			chartGestureRef={chartGestureRef}
 		/>
 	);
 };

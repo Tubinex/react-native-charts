@@ -14,7 +14,6 @@ export const SemiCircleGauge: React.FC<SemiCircleGaugeProps> = ({
 	contentAlignment = 'flex-end',
 }) => {
 	const clampedProgress = Math.min(Math.max(progress, 0), 100);
-
 	const segments = [
 		{
 			value: clampedProgress,
@@ -37,7 +36,6 @@ export const SemiCircleGauge: React.FC<SemiCircleGaugeProps> = ({
 			sweepAngle={180}
 			viewBoxHeightRatio={0.6}
 			centerContent={centerContent}
-			closedLoop={false}
 			contentAlignment={contentAlignment}
 		/>
 	);

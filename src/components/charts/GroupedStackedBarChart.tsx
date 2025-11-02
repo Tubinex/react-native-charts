@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, type GestureResponderEvent } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Svg, { Path, Line, Rect } from 'react-native-svg';
+import Svg, { Path, Line } from 'react-native-svg';
 import Animated, {
 	useSharedValue,
 	useAnimatedProps,
@@ -9,17 +9,17 @@ import Animated, {
 	Easing,
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
-import type { BarChartProps, CornerRadius } from '../../types';
+import type { GroupedStackedBarChartProps, CornerRadius } from '../../types';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-export const BarChart: React.FC<BarChartProps> = ({
+export const GroupedStackedBarChart: React.FC<GroupedStackedBarChartProps> = ({
 	data,
 	width = 320,
 	height = 180,
-	barColor,
 	cornerRadius = 6,
-	barGap = 8,
+	groupGap = 16,
+	barGap = 4,
 	showValues = true,
 	valueFormatter,
 	animationDuration = 1000,
@@ -27,37 +27,47 @@ export const BarChart: React.FC<BarChartProps> = ({
 	xAxis,
 	yAxis,
 	onBarPress,
-	selectedBarIndex = -1,
+	selectedBar,
 	selectedBarColor,
 	selectedBarScale = 1.1,
 	selectionAnimationDuration = 200,
 	onPressOutside,
 	chartGestureRef,
 }) => {
-	const defaultBarColor = barColor || '#7ED957';
-	const defaultSelectedBarColor = selectedBarColor || '#5FB832';
-
-	const showYAxis = yAxis?.show !== false; // Default to true
+	const showYAxis = yAxis?.show !== false;
 	const yAxisTicks = yAxis?.ticks?.count || 4;
-	const showYAxisLabels = yAxis?.labels?.show !== false; // Default to true
+	const showYAxisLabels = yAxis?.labels?.show !== false;
 	const yAxisLabelFormatter = yAxis?.labels?.formatter;
 	const yAxisLabelColor = yAxis?.labels?.color || '#C7C7CC';
 	const yAxisLabelFontSize = yAxis?.labels?.fontSize || 11;
 	const yAxisLabelFontWeight = yAxis?.labels?.fontWeight || '400';
-	const showYAxisGrid = yAxis?.grid?.show !== false; // Default to true
+	const showYAxisGrid = yAxis?.grid?.show !== false;
 	const yAxisGridColor = yAxis?.grid?.color || '#E5E7EB';
 	const yAxisGridWidth = yAxis?.grid?.width || 1;
 	const yAxisGridOpacity = 0.3;
 
-	const showXAxis = xAxis?.show !== false; // Default to true
-	const showXAxisLabels = xAxis?.labels?.show !== false; // Default to true
+	const showXAxis = xAxis?.show !== false;
+	const showXAxisLabels = xAxis?.labels?.show !== false;
 	const xAxisLabelFormatter = xAxis?.labels?.formatter;
 	const xAxisLabelColor = xAxis?.labels?.color || '#8E8E93';
 	const xAxisLabelFontSize = xAxis?.labels?.fontSize || 12;
 	const xAxisLabelFontWeight = xAxis?.labels?.fontWeight || '500';
 
-	const maxValue = maxValueProp || Math.max(...data.map(d => d.value));
+	const isGrouped = data.length > 0 && 'bars' in data[0];
+	let calculatedMaxValue = 0;
+	if (isGrouped) {
+		calculatedMaxValue = Math.max(
+			...data.flatMap(item => ('bars' in item ? item.bars.map(b => b.value) : []))
+		);
+	} else {
+		calculatedMaxValue = Math.max(
+			...data.map(item =>
+				'stack' in item ? item.stack.reduce((sum, s) => sum + s.value, 0) : 0
+			)
+		);
+	}
 
+	const maxValue = maxValueProp || calculatedMaxValue;
 	const getYAxisMax = (max: number) => {
 		const magnitude = Math.pow(10, Math.floor(Math.log10(max)));
 		return Math.ceil(max / magnitude) * magnitude;
@@ -70,19 +80,26 @@ export const BarChart: React.FC<BarChartProps> = ({
 	const chartWidth = width - chartPadding.left - chartPadding.right;
 	const chartHeight = height - chartPadding.top - chartPadding.bottom;
 
-	const totalGaps = (data.length - 1) * barGap;
-	const barWidth = (chartWidth - totalGaps) / data.length;
+	const categoryCount = data.length;
+	const totalCategoryGaps = (categoryCount - 1) * groupGap;
+	const availableWidthForCategories = chartWidth - totalCategoryGaps;
+	const categoryWidth = availableWidthForCategories / categoryCount;
+
+	let barWidth: number;
+	let barsPerCategory: number;
+
+	if (isGrouped) {
+		barsPerCategory = data[0] && 'bars' in data[0] ? data[0].bars.length : 1;
+		const totalBarGaps = (barsPerCategory - 1) * barGap;
+		barWidth = (categoryWidth - totalBarGaps) / barsPerCategory;
+	} else {
+		barsPerCategory = 1;
+		barWidth = categoryWidth;
+	}
 
 	const yAxisValues = Array.from({ length: yAxisTicks + 1 }, (_, i) => {
 		return (yAxisMax / yAxisTicks) * (yAxisTicks - i);
 	});
-
-	const formatValue = (value: number) => {
-		if (valueFormatter) {
-			return valueFormatter(value);
-		}
-		return value.toString();
-	};
 
 	const getBarIndexForPoint = useCallback(
 		(x: number, y: number) => {
@@ -94,16 +111,28 @@ export const BarChart: React.FC<BarChartProps> = ({
 				return -1;
 			}
 
-			for (let i = 0; i < data.length; i++) {
-				const barX = chartPadding.left + i * (barWidth + barGap);
-				if (x >= barX && x <= barX + barWidth) {
-					return i;
+			for (let categoryIndex = 0; categoryIndex < data.length; categoryIndex++) {
+				const categoryX = chartPadding.left + categoryIndex * (categoryWidth + groupGap);
+				const item = data[categoryIndex];
+
+				if (isGrouped && 'bars' in item) {
+					const bars = item.bars;
+					for (let barIndex = 0; barIndex < bars.length; barIndex++) {
+						const barX = categoryX + barIndex * (barWidth + barGap);
+						if (x >= barX && x <= barX + barWidth) {
+							return categoryIndex * barsPerCategory + barIndex;
+						}
+					}
+				} else {
+					if (x >= categoryX && x <= categoryX + barWidth) {
+						return categoryIndex;
+					}
 				}
 			}
 
 			return -1;
 		},
-		[data.length, chartPadding.left, chartPadding.top, chartHeight, barWidth, barGap]
+		[data.length, chartPadding.left, chartPadding.top, chartHeight, barWidth, barGap, categoryWidth, groupGap, isGrouped, barsPerCategory]
 	);
 
 	const handleBarTap = useCallback(
@@ -161,18 +190,18 @@ export const BarChart: React.FC<BarChartProps> = ({
 
 	const handleTouchStart = useCallback(
 		(event: GestureResponderEvent) => {
-			if (!onPressOutside || selectedBarIndex === -1) {
+			if (!onPressOutside || !selectedBar) {
 				return;
 			}
 			const { locationX, locationY } = event.nativeEvent;
 			deselectTouchStartRef.current = { x: locationX, y: locationY, time: Date.now() };
 		},
-		[onPressOutside, selectedBarIndex]
+		[onPressOutside, selectedBar]
 	);
 
 	const handleTouchEnd = useCallback(
 		(event: GestureResponderEvent) => {
-			if (!onPressOutside || selectedBarIndex === -1) {
+			if (!onPressOutside || !selectedBar) {
 				return;
 			}
 
@@ -198,12 +227,12 @@ export const BarChart: React.FC<BarChartProps> = ({
 				}
 			}
 		},
-		[onPressOutside, selectedBarIndex, getBarIndexForPoint]
+		[onPressOutside, selectedBar, getBarIndexForPoint]
 	);
 
-	const deselectTouchEnabled = !!onPressOutside && selectedBarIndex !== -1;
+	const deselectTouchEnabled = !!onPressOutside && !!selectedBar;
 
-	const chartContent = (
+	return (
 		<View
 			style={[styles.container, { width, height: height + chartPadding.top }]}
 			onTouchStart={deselectTouchEnabled ? handleTouchStart : undefined}
@@ -231,31 +260,65 @@ export const BarChart: React.FC<BarChartProps> = ({
 							);
 						})}
 
-					{data.map((item, index) => {
-						const barHeight = (item.value / yAxisMax) * chartHeight;
-						const x = chartPadding.left + index * (barWidth + barGap);
-						const y = chartPadding.top + chartHeight - barHeight;
-						const isSelected = index === selectedBarIndex;
-						const color =
-							item.color || (isSelected ? defaultSelectedBarColor : defaultBarColor);
+					{data.map((item, categoryIndex) => {
+						const categoryX = chartPadding.left + categoryIndex * (categoryWidth + groupGap);
 
-						return (
-							<React.Fragment key={index}>
-								<AnimatedBar
-									x={x}
-									y={y}
-									width={barWidth}
-									height={barHeight}
-									color={color}
-									cornerRadius={cornerRadius}
-									delay={index * 50}
-									animationDuration={animationDuration}
-									isSelected={isSelected}
-									selectedBarScale={selectedBarScale}
-									selectionAnimationDuration={selectionAnimationDuration}
-								/>
-							</React.Fragment>
-						);
+						if (isGrouped && 'bars' in item) {
+							return item.bars.map((bar, barIndex) => {
+								const barHeight = (bar.value / yAxisMax) * chartHeight;
+								const x = categoryX + barIndex * (barWidth + barGap);
+								const y = chartPadding.top + chartHeight - barHeight;
+								const globalBarIndex = categoryIndex * barsPerCategory + barIndex;
+								const isSelected =
+									selectedBar?.categoryIndex === categoryIndex &&
+									selectedBar?.barIndex === barIndex;
+
+								return (
+									<React.Fragment key={`${categoryIndex}-${barIndex}`}>
+										<AnimatedBar
+											x={x}
+											y={y}
+											width={barWidth}
+											height={barHeight}
+											color={isSelected && selectedBarColor ? selectedBarColor : bar.color}
+											cornerRadius={cornerRadius}
+											delay={globalBarIndex * 50}
+											animationDuration={animationDuration}
+											isSelected={isSelected}
+											selectedBarScale={selectedBarScale}
+											selectionAnimationDuration={selectionAnimationDuration}
+										/>
+									</React.Fragment>
+								);
+							});
+						} else if ('stack' in item) {
+							let currentY = chartPadding.top + chartHeight;
+							return item.stack.map((segment, segmentIndex) => {
+								const segmentHeight = (segment.value / yAxisMax) * chartHeight;
+								currentY -= segmentHeight;
+								const isSelected = selectedBar?.categoryIndex === categoryIndex;
+
+								return (
+									<React.Fragment key={`${categoryIndex}-${segmentIndex}`}>
+										<AnimatedBar
+											x={categoryX}
+											y={currentY}
+											width={barWidth}
+											height={segmentHeight}
+											color={isSelected && selectedBarColor ? selectedBarColor : segment.color}
+											cornerRadius={cornerRadius}
+											delay={categoryIndex * 50 + segmentIndex * 20}
+											animationDuration={animationDuration}
+											isSelected={isSelected}
+											selectedBarScale={selectedBarScale}
+											selectionAnimationDuration={selectionAnimationDuration}
+										/>
+									</React.Fragment>
+								);
+							});
+						}
+
+						return null;
 					})}
 				</Svg>
 			</GestureDetector>
@@ -295,42 +358,15 @@ export const BarChart: React.FC<BarChartProps> = ({
 				</View>
 			)}
 
-			{showValues && (
-				<View style={[styles.labelsContainer, { top: 0, width, height: chartPadding.top }]}>
-					{data.map((item, index) => {
-						const barHeight = (item.value / yAxisMax) * chartHeight;
-						const x = chartPadding.left + index * (barWidth + barGap);
-						const shouldShowLabel =
-							item.showValue !== false && barHeight > chartHeight * 0.2;
-
-						return shouldShowLabel ? (
-							<Animated.View
-								key={index}
-								style={[
-									styles.valueLabel,
-									{
-										left: x,
-										width: barWidth,
-										top: chartPadding.top + chartHeight - barHeight - 22,
-									},
-								]}
-							>
-								<Text style={styles.valueLabelText}>{formatValue(item.value)}</Text>
-							</Animated.View>
-						) : null;
-					})}
-				</View>
-			)}
-
 			{showXAxis && showXAxisLabels && (
 				<View style={[styles.xAxisLabels, { top: chartPadding.top + chartHeight + 8, width }]}>
 					{data.map((item, index) => {
-						const x = chartPadding.left + index * (barWidth + barGap);
+						const x = chartPadding.left + index * (categoryWidth + groupGap);
 						const formattedLabel = xAxisLabelFormatter
-							? xAxisLabelFormatter(item.label, index)
-							: item.label;
+							? xAxisLabelFormatter(item.category, index)
+							: item.category;
 						return (
-							<View key={index} style={[styles.xAxisLabel, { left: x, width: barWidth }]}>
+							<View key={index} style={[styles.xAxisLabel, { left: x, width: categoryWidth }]}>
 								<Text
 									style={[
 										styles.xAxisLabelText,
@@ -350,8 +386,6 @@ export const BarChart: React.FC<BarChartProps> = ({
 			)}
 		</View>
 	);
-
-	return chartContent;
 };
 
 interface AnimatedBarProps {
@@ -476,19 +510,6 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
 const styles = StyleSheet.create({
 	container: {
 		position: 'relative',
-	},
-	labelsContainer: {
-		position: 'absolute',
-	},
-	valueLabel: {
-		position: 'absolute',
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
-	valueLabelText: {
-		fontSize: 11,
-		fontWeight: '600',
-		color: '#1C1C1E',
 	},
 	yAxisLabels: {
 		position: 'absolute',

@@ -15,9 +15,10 @@ export const SemiCircleChart: React.FC<SemiCircleChartProps> = ({
 	selectionAnimationDuration,
 	onSegmentPress,
 	selectedSegmentIndex = -1,
-	allowTapWhenNoSelection,
 	centerContent,
 	contentAlignment = 'flex-end',
+	onPressOutside,
+	chartGestureRef,
 }) => {
 	return (
 		<RadialChart
@@ -33,13 +34,13 @@ export const SemiCircleChart: React.FC<SemiCircleChartProps> = ({
 			sweepAngle={180}
 			viewBoxHeightRatio={0.6}
 			centerContent={centerContent}
-			closedLoop={false}
 			contentAlignment={contentAlignment}
 			onSegmentPress={onSegmentPress}
 			selectedSegmentIndex={selectedSegmentIndex}
 			selectedStrokeWidthIncrease={selectedStrokeWidthIncrease}
 			selectionAnimationDuration={selectionAnimationDuration}
-			allowTapWhenNoSelection={allowTapWhenNoSelection}
+			onPressOutside={onPressOutside}
+			chartGestureRef={chartGestureRef}
 		/>
 	);
 };

@@ -17,7 +17,6 @@ export const RadialGauge: React.FC<RadialGaugeProps> = ({
 	contentAlignment = 'center',
 }) => {
 	const clampedProgress = Math.min(Math.max(progress, 0), 100);
-
 	const segments = [
 		{
 			value: clampedProgress,
@@ -40,7 +39,6 @@ export const RadialGauge: React.FC<RadialGaugeProps> = ({
 			sweepAngle={sweepAngle}
 			viewBoxHeightRatio={viewBoxHeightRatio}
 			centerContent={centerContent}
-			closedLoop={false}
 			contentAlignment={contentAlignment}
 		/>
 	);
