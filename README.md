@@ -7,10 +7,10 @@ A collection of beautiful, customizable, and performant chart components for Rea
 
 ## Features
 
-- **Beautiful Animations** - Smooth 60fps animations powered by Reanimated 2
+- **Beautiful Animations** - Smooth animations powered by Reanimated 2
 - **Interactive** - Built-in tap gesture support for charts
 - **Highly Customizable** - Extensive props for styling and behavior
-- **TypeScript** - Full TypeScript support with comprehensive type definitions
+- **TypeScript** - Full TypeScript support
 
 ## Components
 
@@ -23,8 +23,8 @@ A collection of beautiful, customizable, and performant chart components for Rea
 
 ### Gauges
 
-- **DonutGauge** - Full circle progress gauge (0-100%)
-- **SemiCircleGauge** - Half circle progress gauge (0-100%)
+- **DonutGauge** - Full circle progress gauge
+- **SemiCircleGauge** - Half circle progress gauge
 - **RadialGauge** - Base component for custom gauges
 
 ## Installation
