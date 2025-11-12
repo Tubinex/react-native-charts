@@ -82,6 +82,13 @@ export interface GroupedBarData {
 		color: string;
 		label?: string;
 		selectionConfig?: ItemSelectionConfig;
+		stack?: {
+			value: number;
+			color: string;
+			label?: string;
+			cornerRadius?: CornerRadius;
+			selectionConfig?: ItemSelectionConfig;
+		}[];
 	}[];
 }
 

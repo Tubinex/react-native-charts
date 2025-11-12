@@ -3,7 +3,7 @@
 A collection of beautiful, customizable, and performant chart components for React Native.
 
 [![NPM Version](https://img.shields.io/npm/v/@tubinex/react-native-charts.svg)](https://www.npmjs.com/package/@tubinex/react-native-charts)
-[![License](https://img.shields.io/npm/l/@tubinex/react-native-charts.svg)](https://github.com/Tubinex/react-native-charts/blob/main/LICENSE)
+[![License](https://img.shields.io/npm/l/@tubinex/react-native-charts.svg)](https://github.com/Tubinex/react-native-charts/blob/master/LICENSE)
 
 ## Features
 
@@ -12,19 +12,67 @@ A collection of beautiful, customizable, and performant chart components for Rea
 - **Highly Customizable** - Extensive props for styling and behavior
 - **TypeScript** - Full TypeScript support
 
+## Gallery
+
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <img src="docs/images/bar-chart.png" alt="BarChart" width="200"/><br/>
+      <b>BarChart</b>
+    </td>
+    <td align="center" width="33%">
+      <img src="docs/images/grouped-bar-chart.png" alt="GroupedBarChart" width="200"/><br/>
+      <b>GroupedBarChart</b>
+    </td>
+    <td align="center" width="33%">
+      <img src="docs/images/stacked-bar-chart.png" alt="StackedBarChart" width="200"/><br/>
+      <b>StackedBarChart</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="33%">
+      <img src="docs/images/donut-chart.png" alt="DonutChart" width="200"/><br/>
+      <b>DonutChart</b>
+    </td>
+    <td align="center" width="33%">
+      <img src="docs/images/semi-circle-chart.png" alt="SemiCircleChart" width="200"/><br/>
+      <b>SemiCircleChart</b>
+    </td>
+    <td align="center" width="33%">
+      <img src="docs/images/donut-gauge.png" alt="DonutGauge" width="200"/><br/>
+      <b>DonutGauge</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="33%">
+      <img src="docs/images/semi-circle-gauge.png" alt="SemiCircleGauge" width="200"/><br/>
+      <b>SemiCircleGauge</b>
+    </td>
+    <td align="center" width="33%">
+      <img src="docs/images/grouped-stacked-bar-chart.png" alt="GroupedStackedBarChart" width="200"/><br/>
+      <b>GroupedStackedBarChart</b>
+    </td>
+    <td align="center" width="33%">
+    </td>
+  </tr>
+</table>
+
 ## Components
 
 ### Charts
 
 - **BarChart** - Animated vertical bar chart with Y-axis labels and interactive bar selection
+- **GroupedBarChart** - Multiple bars per category for comparing values across groups
+- **StackedBarChart** - Stacked segments showing part-to-whole relationships
+- **GroupedStackedBarChart** - Advanced chart combining grouped and stacked bar features
 - **DonutChart** - Full circle chart with multiple segments
 - **SemiCircleChart** - Half circle chart with multiple segments
 - **RadialChart** - Base component for custom radial charts
 
 ### Gauges
 
-- **DonutGauge** - Full circle progress gauge
-- **SemiCircleGauge** - Half circle progress gauge
+- **DonutGauge** - Full circle progress gauge (0-100%)
+- **SemiCircleGauge** - Half circle progress gauge (0-100%)
 - **RadialGauge** - Base component for custom gauges
 
 ## Installation
@@ -56,87 +104,6 @@ module.exports = {
 };
 ```
 
-## Quick Start
-
-```tsx
-import { Text, View } from 'react-native';
-import {
-	BarChart,
-	DonutChart,
-	SemiCircleChart,
-	DonutGauge,
-	SemiCircleGauge,
-} from '@tubinex/react-native-charts';
-
-// Bar Chart with interactive selection
-const [selectedBar, setSelectedBar] = useState(-1);
-
-<BarChart
-	data={[
-		{ value: 120, label: 'Mon' },
-		{ value: 250, label: 'Tue' },
-		{ value: 180, label: 'Wed' },
-	]}
-	selectedBarIndex={selectedBar}
-	onBarPress={(index) => setSelectedBar(index === selectedBar ? -1 : index)}
-	valueFormatter={(value) => `$${value}`}
-/>
-
-// Donut Chart with custom center content
-<DonutChart
-	segments={[
-		{ value: 100, color: '#FF5733', label: 'Food' },
-		{ value: 50, color: '#3357FF', label: 'Transport' },
-		{ value: 75, color: '#33FF57', label: 'Entertainment' },
-	]}
-	centerContent={
-		<View>
-			<Text style={{ fontSize: 14, color: '#8E8E93' }}>Total</Text>
-			<Text style={{ fontSize: 28, fontWeight: '700' }}>$225</Text>
-		</View>
-	}
-/>
-
-// Donut Gauge with custom content
-<DonutGauge
-	progress={75}
-	color="#7ED957"
-	centerContent={
-		<View>
-			<Text style={{ fontSize: 14, color: '#8E8E93' }}>Progress</Text>
-			<Text style={{ fontSize: 28, fontWeight: '700' }}>75%</Text>
-		</View>
-	}
-/>
-
-// SemiCircle Chart with custom content
-<SemiCircleChart
-	segments={[
-		{ value: 300, color: '#7ED957', label: 'Savings' },
-		{ value: 200, color: '#FFB800', label: 'Spending' },
-	]}
-	centerContent={
-		<View>
-			<Text style={{ fontSize: 14, color: '#8E8E93' }}>Balance</Text>
-			<Text style={{ fontSize: 36, fontWeight: '700' }}>$500</Text>
-		</View>
-	}
-	contentAlignment="flex-end"
-/>
-
-// SemiCircle Gauge
-<SemiCircleGauge
-	progress={65}
-	color="#FFB800"
-	centerContent={
-		<View>
-			<Text style={{ fontSize: 14, color: '#8E8E93' }}>Battery</Text>
-			<Text style={{ fontSize: 36, fontWeight: '700' }}>65%</Text>
-		</View>
-	}
-/>
-```
-
 ## Global Touch Provider Setup
 
 Wrap your application with the `GlobalTouchProvider` so charts can observe touches without stealing gestures. From any `onPressOutside` handler you can call `event.preventDefault()` to keep the current selection active, for example when a different pressable already consumed the tap.
@@ -162,7 +129,8 @@ export default function App() {
 
 Animated vertical bar chart with interactive bar selection.
 
-#### Props
+<details>
+<summary><b>View Props & Example</b></summary>
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -185,8 +153,7 @@ Animated vertical bar chart with interactive bar selection.
 | `deselectOnPressOutside` | `boolean` | `false` | Automatically clear selection after outside touches unless `event.preventDefault()` is called |
 | `chartGestureRef` | `React.RefObject<any>` | `undefined` | Ref for the chart's gesture handler |
 
-#### Types
-
+**Types:**
 ```typescript
 interface BarData {
 	value: number;
@@ -197,27 +164,326 @@ interface BarData {
 }
 ```
 
-#### Example
-
+**Example:**
 ```tsx
 const [selectedBar, setSelectedBar] = useState(-1);
 
 <BarChart
 	data={[
-		{ value: 120, label: 'Mon', color: '#3B82F6' },
-		{ value: 250, label: 'Tue', color: '#10B981' },
-		{ value: 180, label: 'Wed', color: '#F59E0B' },
+		{ value: 120, label: 'Mon', color: '#7ED957' },
+		{ value: 250, label: 'Tue', color: '#7ED957' },
+		{ value: 180, label: 'Wed', color: '#7ED957' },
+		{ value: 320, label: 'Thu', color: '#7ED957' },
+		{ value: 210, label: 'Fri', color: '#7ED957' },
+		{ value: 280, label: 'Sat', color: '#7ED957' },
+		{ value: 150, label: 'Sun', color: '#7ED957' },
 	]}
 	selectedBarIndex={selectedBar}
-	selectionStyle={{ color: '#2563EB', scale: 1.1 }}
+	selectionStyle={{ color: '#5FB837', scale: 1.1 }}
 	onBarPress={(index) => setSelectedBar(index === selectedBar ? -1 : index)}
-	valueFormatter={(value) => `$${value.toFixed(2)}`}
+	valueFormatter={(value) => `$${value}`}
 	width={320}
 	height={200}
-	barGap={12}
+	barGap={8}
 	yAxis={{ show: true }}
 />
 ```
+</details>
+
+---
+
+### GroupedBarChart
+
+Display multiple bars per category for comparing values across groups.
+
+<details>
+<summary><b>View Props & Example</b></summary>
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `data` | `GroupedBarData[]` | **required** | Array of categories with multiple bars |
+| `width` | `number` | `320` | Width of the chart in pixels |
+| `height` | `number` | `180` | Height of the chart in pixels |
+| `cornerRadius` | `number \| CornerRadius` | `6` | Corner radius for bars |
+| `groupGap` | `number` | `16` | Gap between bar groups in pixels |
+| `barGap` | `number` | `4` | Gap between bars within a group |
+| `animationDuration` | `number` | `1000` | Duration of animation in milliseconds |
+| `onBarPress` | `(categoryIndex: number, barIndex: number) => void` | `undefined` | Callback when a bar is pressed |
+| `selectedCategoryIndex` | `number` | `-1` | Index of currently selected category |
+| `selectedBarIndex` | `number` | `-1` | Index of currently selected bar within category |
+| `selectionStyle` | `SelectionStyleConfig` | `undefined` | Configuration for selected bar appearance |
+| `xAxis` | `AxisConfig` | `undefined` | X-axis configuration |
+| `yAxis` | `AxisConfig` | `undefined` | Y-axis configuration |
+
+**Types:**
+```typescript
+interface GroupedBarData {
+	category: string;
+	bars: { value: number; color: string; label?: string }[];
+}
+```
+
+**Example:**
+```tsx
+<GroupedBarChart
+	data={[
+		{
+			category: 'Q1',
+			bars: [
+				{ value: 120, color: '#7ED957', label: 'Revenue' },
+				{ value: 85, color: '#FFB800', label: 'Expenses' },
+			],
+		},
+		{
+			category: 'Q2',
+			bars: [
+				{ value: 150, color: '#7ED957', label: 'Revenue' },
+				{ value: 95, color: '#FFB800', label: 'Expenses' },
+			],
+		},
+		{
+			category: 'Q3',
+			bars: [
+				{ value: 180, color: '#7ED957', label: 'Revenue' },
+				{ value: 110, color: '#FFB800', label: 'Expenses' },
+			],
+		},
+		{
+			category: 'Q4',
+			bars: [
+				{ value: 200, color: '#7ED957', label: 'Revenue' },
+				{ value: 120, color: '#FFB800', label: 'Expenses' },
+			],
+		},
+	]}
+	groupGap={16}
+	barGap={6}
+	yAxis={{ show: true }}
+/>
+```
+</details>
+
+---
+
+### StackedBarChart
+
+Stacked bar chart showing part-to-whole relationships with interactive segments.
+
+<details>
+<summary><b>View Props & Example</b></summary>
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `data` | `StackedBarData[]` | **required** | Array of categories with stacked segments |
+| `width` | `number` | `320` | Width of the chart in pixels |
+| `height` | `number` | `180` | Height of the chart in pixels |
+| `cornerRadius` | `number \| CornerRadius` | `6` | Corner radius for bars |
+| `groupGap` | `number` | `16` | Gap between stacked bars |
+| `stackGap` | `number` | `0` | Gap between segments within a stack |
+| `animationDuration` | `number` | `1000` | Duration of animation in milliseconds |
+| `selectedCategoryIndex` | `number` | `-1` | Index of currently selected category |
+| `selectedSegmentIndex` | `number` | `-1` | Index of currently selected segment |
+| `selectionStyle` | `SelectionStyleConfig` | `undefined` | Configuration for selected segment appearance |
+| `xAxis` | `AxisConfig` | `undefined` | X-axis configuration |
+| `yAxis` | `AxisConfig` | `undefined` | Y-axis configuration |
+
+**Types:**
+```typescript
+interface StackedBarData {
+	category: string;
+	stack: { value: number; color: string; label?: string }[];
+}
+```
+
+**Example:**
+```tsx
+<StackedBarChart
+	data={[
+		{
+			category: 'Jan',
+			stack: [
+				{ value: 120, color: '#7ED957', label: 'Housing' },
+				{ value: 80, color: '#FFB800', label: 'Food' },
+				{ value: 50, color: '#FF5C5C', label: 'Transport' },
+			],
+		},
+		{
+			category: 'Feb',
+			stack: [
+				{ value: 120, color: '#7ED957', label: 'Housing' },
+				{ value: 90, color: '#FFB800', label: 'Food' },
+				{ value: 45, color: '#FF5C5C', label: 'Transport' },
+			],
+		},
+		{
+			category: 'Mar',
+			stack: [
+				{ value: 120, color: '#7ED957', label: 'Housing' },
+				{ value: 85, color: '#FFB800', label: 'Food' },
+				{ value: 55, color: '#FF5C5C', label: 'Transport' },
+			],
+		},
+		{
+			category: 'Apr',
+			stack: [
+				{ value: 120, color: '#7ED957', label: 'Housing' },
+				{ value: 95, color: '#FFB800', label: 'Food' },
+				{ value: 60, color: '#FF5C5C', label: 'Transport' },
+			],
+		},
+		{
+			category: 'May',
+			stack: [
+				{ value: 120, color: '#7ED957', label: 'Housing' },
+				{ value: 100, color: '#FFB800', label: 'Food' },
+				{ value: 50, color: '#FF5C5C', label: 'Transport' },
+			],
+		},
+		{
+			category: 'Jun',
+			stack: [
+				{ value: 120, color: '#7ED957', label: 'Housing' },
+				{ value: 110, color: '#FFB800', label: 'Food' },
+				{ value: 65, color: '#FF5C5C', label: 'Transport' },
+			],
+		},
+	]}
+	stackGap={2}
+	yAxis={{ show: true }}
+/>
+```
+</details>
+
+---
+
+### GroupedStackedBarChart
+
+Advanced chart combining grouped and stacked bar features for complex data visualization.
+
+<details>
+<summary><b>View Props & Example</b></summary>
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `data` | `GroupedBarData[] \| StackedBarData[]` | **required** | Array of grouped or stacked data |
+| `width` | `number` | `320` | Width of the chart in pixels |
+| `height` | `number` | `180` | Height of the chart in pixels |
+| `cornerRadius` | `number \| CornerRadius` | `6` | Corner radius for bars |
+| `groupGap` | `number` | `16` | Gap between bar groups |
+| `barGap` | `number` | `4` | Gap between bars within a group |
+| `stackGap` | `number` | `0` | Gap between segments in stacks |
+| `animationDuration` | `number` | `1000` | Duration of animation in milliseconds |
+| `onBarPress` | `(categoryIndex: number, barIndex?: number) => void` | `undefined` | Callback when a bar is pressed |
+| `selectedCategoryIndex` | `number` | `-1` | Index of currently selected category |
+| `selectedBarIndex` | `number` | `-1` | Index of currently selected bar |
+| `selectedSegmentIndex` | `number` | `-1` | Index of currently selected segment |
+| `selectionStyle` | `SelectionStyleConfig` | `undefined` | Configuration for selected item appearance |
+
+**Example:**
+```tsx
+// Grouped stacked bars - multiple stacked bars per quarter
+<GroupedStackedBarChart
+	data={[
+		{
+			category: 'Q1',
+			bars: [
+				{
+					value: 120,
+					color: '#7ED957',
+					stack: [
+						{ value: 50, color: '#7ED957' },
+						{ value: 40, color: '#5FB837' },
+						{ value: 30, color: '#4A9629' },
+					],
+				},
+				{
+					value: 100,
+					color: '#FFB800',
+					stack: [
+						{ value: 45, color: '#FFB800' },
+						{ value: 30, color: '#CC9600' },
+						{ value: 25, color: '#997100' },
+					],
+				},
+			],
+		},
+		{
+			category: 'Q2',
+			bars: [
+				{
+					value: 150,
+					color: '#7ED957',
+					stack: [
+						{ value: 60, color: '#7ED957' },
+						{ value: 50, color: '#5FB837' },
+						{ value: 40, color: '#4A9629' },
+					],
+				},
+				{
+					value: 125,
+					color: '#FFB800',
+					stack: [
+						{ value: 55, color: '#FFB800' },
+						{ value: 40, color: '#CC9600' },
+						{ value: 30, color: '#997100' },
+					],
+				},
+			],
+		},
+		{
+			category: 'Q3',
+			bars: [
+				{
+					value: 175,
+					color: '#7ED957',
+					stack: [
+						{ value: 70, color: '#7ED957' },
+						{ value: 60, color: '#5FB837' },
+						{ value: 45, color: '#4A9629' },
+					],
+				},
+				{
+					value: 145,
+					color: '#FFB800',
+					stack: [
+						{ value: 60, color: '#FFB800' },
+						{ value: 50, color: '#CC9600' },
+						{ value: 35, color: '#997100' },
+					],
+				},
+			],
+		},
+		{
+			category: 'Q4',
+			bars: [
+				{
+					value: 200,
+					color: '#7ED957',
+					stack: [
+						{ value: 80, color: '#7ED957' },
+						{ value: 70, color: '#5FB837' },
+						{ value: 50, color: '#4A9629' },
+					],
+				},
+				{
+					value: 165,
+					color: '#FFB800',
+					stack: [
+						{ value: 70, color: '#FFB800' },
+						{ value: 55, color: '#CC9600' },
+						{ value: 40, color: '#997100' },
+					],
+				},
+			],
+		},
+	]}
+	groupGap={16}
+	barGap={6}
+	stackGap={2}
+	yAxis={{ show: true }}
+/>
+```
+</details>
 
 ---
 
@@ -225,7 +491,8 @@ const [selectedBar, setSelectedBar] = useState(-1);
 
 Full circle chart with multiple segments and custom center content.
 
-#### Props
+<details>
+<summary><b>View Props & Example</b></summary>
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -245,8 +512,7 @@ Full circle chart with multiple segments and custom center content.
 | `deselectOnPressOutside` | `boolean` | `false` | Automatically clear selection on outside touches |
 | `chartGestureRef` | `React.RefObject<any>` | `undefined` | Ref for the chart's gesture handler |
 
-#### Types
-
+**Types:**
 ```typescript
 interface ChartSegment {
 	value: number;
@@ -255,21 +521,23 @@ interface ChartSegment {
 }
 ```
 
-#### Example
-
+**Example:**
 ```tsx
 const [selectedIndex, setSelectedIndex] = useState(-1);
 
 <DonutChart
 	segments={[
-		{ value: 100, color: '#FF5733', label: 'Food' },
-		{ value: 50, color: '#3357FF', label: 'Transport' },
-		{ value: 75, color: '#33FF57', label: 'Entertainment' },
+		{ value: 120, color: '#7ED957', label: 'Housing' },
+		{ value: 90, color: '#FFB800', label: 'Food' },
+		{ value: 60, color: '#FF5C5C', label: 'Transport' },
+		{ value: 45, color: '#3B82F6', label: 'Entertainment' },
+		{ value: 35, color: '#8B5CF6', label: 'Utilities' },
 	]}
+	segmentGap={4}
 	centerContent={
 		<View style={{ alignItems: 'center' }}>
-			<Text style={{ fontSize: 14, color: '#8E8E93' }}>Total Spent</Text>
-			<Text style={{ fontSize: 28, fontWeight: '700' }}>$225</Text>
+			<Text style={{ fontSize: 14, color: '#8E8E93' }}>Total Budget</Text>
+			<Text style={{ fontSize: 28, fontWeight: '700' }}>$350</Text>
 		</View>
 	}
 	selectedSegmentIndex={selectedIndex}
@@ -278,6 +546,7 @@ const [selectedIndex, setSelectedIndex] = useState(-1);
 	}}
 />
 ```
+</details>
 
 ---
 
@@ -285,7 +554,8 @@ const [selectedIndex, setSelectedIndex] = useState(-1);
 
 Full circle progress gauge for single progress values.
 
-#### Props
+<details>
+<summary><b>View Props & Example</b></summary>
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -298,8 +568,7 @@ Full circle progress gauge for single progress values.
 | `animationDuration` | `number` | `1200` | Animation duration in milliseconds |
 | `centerContent` | `React.ReactNode` | `undefined` | Custom content for center |
 
-#### Example
-
+**Example:**
 ```tsx
 <DonutGauge
 	progress={85}
@@ -314,6 +583,7 @@ Full circle progress gauge for single progress values.
 	}
 />
 ```
+</details>
 
 ---
 
@@ -321,7 +591,8 @@ Full circle progress gauge for single progress values.
 
 Half circle chart with multiple segments and custom center content.
 
-#### Props
+<details>
+<summary><b>View Props & Example</b></summary>
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -343,27 +614,28 @@ Half circle chart with multiple segments and custom center content.
 | `deselectOnPressOutside` | `boolean` | `false` | Automatically clear selection on outside touches |
 | `chartGestureRef` | `React.RefObject<any>` | `undefined` | Ref for the chart's gesture handler |
 
-#### Example
-
+**Example:**
 ```tsx
 <SemiCircleChart
 	segments={[
-		{ value: 400, color: '#7ED957', label: 'Savings' },
-		{ value: 300, color: '#FFB800', label: 'Spending' },
-		{ value: 100, color: '#FF5C5C', label: 'Bills' },
+		{ value: 450, color: '#7ED957', label: 'Savings' },
+		{ value: 280, color: '#FFB800', label: 'Spending' },
+		{ value: 120, color: '#FF5C5C', label: 'Bills' },
+		{ value: 80, color: '#3B82F6', label: 'Investments' },
 	]}
 	size={300}
 	strokeWidth={45}
-	segmentGap={3}
+	segmentGap={4}
 	centerContent={
 		<View style={{ alignItems: 'center' }}>
-			<Text style={{ fontSize: 14, color: '#8E8E93' }}>Budget</Text>
-			<Text style={{ fontSize: 36, fontWeight: '700' }}>$800</Text>
+			<Text style={{ fontSize: 14, color: '#8E8E93' }}>Total Balance</Text>
+			<Text style={{ fontSize: 36, fontWeight: '700' }}>$930</Text>
 		</View>
 	}
 	contentAlignment="flex-end"
 />
 ```
+</details>
 
 ---
 
@@ -371,7 +643,8 @@ Half circle chart with multiple segments and custom center content.
 
 Half circle progress gauge for single progress values.
 
-#### Props
+<details>
+<summary><b>View Props & Example</b></summary>
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -385,8 +658,7 @@ Half circle progress gauge for single progress values.
 | `centerContent` | `React.ReactNode` | `undefined` | Custom content for center |
 | `contentAlignment` | `'center' \| 'flex-start' \| 'flex-end'` | `'flex-end'` | Center content alignment |
 
-#### Example
-
+**Example:**
 ```tsx
 <SemiCircleGauge
 	progress={65}
@@ -400,16 +672,16 @@ Half circle progress gauge for single progress values.
 	contentAlignment="flex-end"
 />
 ```
+</details>
 
 ---
 
 ### RadialChart
 
-Radial/circular chart component for custom implementations.
+Radial/circular chart component for custom implementations. See `RadialGauge` for gauge-specific wrapper.
 
-See `RadialGauge` for gauge-specific wrapper.
-
-#### Props
+<details>
+<summary><b>View Props</b></summary>
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -435,6 +707,7 @@ See `RadialGauge` for gauge-specific wrapper.
 | `onPressOutside` | `(event: ChartPressOutsideEvent) => void` | `undefined` | Called when a touch occurs outside the chart |
 | `deselectOnPressOutside` | `boolean` | `false` | Automatically clear selection on outside touches |
 | `chartGestureRef` | `React.RefObject<any>` | `undefined` | Ref for the chart's gesture handler |
+</details>
 
 ---
 
@@ -444,15 +717,32 @@ Full TypeScript support with comprehensive type definitions:
 
 ```typescript
 import type {
+	// Bar Charts
 	BarData,
 	BarChartProps,
+	GroupedBarData,
+	GroupedBarChartProps,
+	StackedBarData,
+	StackedBarChartProps,
+	GroupedStackedBarChartProps,
+
+	// Radial Charts
 	ChartSegment,
 	DonutChartProps,
 	SemiCircleChartProps,
+	RadialChartProps,
+
+	// Gauges
 	DonutGaugeProps,
 	SemiCircleGaugeProps,
-	RadialChartProps,
+	RadialGaugeProps,
+
+	// Shared Types
 	ContentAlignment,
+	CornerRadius,
+	AxisConfig,
+	SelectionStyleConfig,
+	ChartPressOutsideEvent,
 } from '@tubinex/react-native-charts';
 ```
 

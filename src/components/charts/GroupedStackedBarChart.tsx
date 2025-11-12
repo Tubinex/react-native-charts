@@ -772,8 +772,39 @@ export const GroupedStackedBarChart: React.FC<GroupedStackedBarChartProps> = ({
 
 						if (isGrouped && 'bars' in item) {
 							return item.bars.map((bar, barIndex) => {
-								const barHeight = (bar.value / yAxisMax) * chartHeight;
 								const x = categoryX + barIndex * (barWidth + barGap);
+
+								if ('stack' in bar && bar.stack) {
+									return (
+										<StackedBar
+											key={`stack-${categoryIndex}-${barIndex}`}
+											stack={bar.stack}
+											x={x}
+											width={barWidth}
+											chartPaddingTop={chartPadding.top}
+											chartHeight={chartHeight}
+											yAxisMax={yAxisMax}
+											cornerRadius={cornerRadius}
+											categoryIndex={categoryIndex}
+											selectedCategoryIndex={selectedCategoryIndex}
+											selectedSegmentIndex={selectedSegmentIndex}
+											selectedBarWidthScale={selectedWidthScale}
+											selectedBarHeightScale={selectedHeightScale}
+											selectionAnimationDuration={selectionDuration}
+											animationDuration={animationDuration}
+											stackGap={stackGap}
+											enableRecolor={enableRecolor}
+											enableBorder={enableBorder}
+											selectionBorderWidth={selectionBorderWidth}
+											selectionBorderColor={selectionBorderColor}
+											selectionBorderAnimate={selectionBorderAnimate}
+											selectionColor={selectionColor}
+											applyToWholeStack={applyToWholeStack}
+										/>
+									);
+								}
+
+								const barHeight = (bar.value / yAxisMax) * chartHeight;
 								const y = chartPadding.top + chartHeight - barHeight;
 								const globalBarIndex = categoryIndex * barsPerCategory + barIndex;
 								const isSelected =
