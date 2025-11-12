@@ -17,39 +17,39 @@ A collection of beautiful, customizable, and performant chart components for Rea
 <table>
   <tr>
     <td align="center" width="33%">
-      <img src="docs/images/bar-chart.png" alt="BarChart" width="200"/><br/>
+      <img src="docs/images/bar-chart.gif" alt="BarChart" width="200"/><br/>
       <b>BarChart</b>
     </td>
     <td align="center" width="33%">
-      <img src="docs/images/grouped-bar-chart.png" alt="GroupedBarChart" width="200"/><br/>
+      <img src="docs/images/grouped-bar-chart.gif" alt="GroupedBarChart" width="200"/><br/>
       <b>GroupedBarChart</b>
     </td>
     <td align="center" width="33%">
-      <img src="docs/images/stacked-bar-chart.png" alt="StackedBarChart" width="200"/><br/>
+      <img src="docs/images/stacked-bar-chart.gif" alt="StackedBarChart" width="200"/><br/>
       <b>StackedBarChart</b>
     </td>
   </tr>
   <tr>
     <td align="center" width="33%">
-      <img src="docs/images/donut-chart.png" alt="DonutChart" width="200"/><br/>
+      <img src="docs/images/donut-chart.gif" alt="DonutChart" width="200"/><br/>
       <b>DonutChart</b>
     </td>
     <td align="center" width="33%">
-      <img src="docs/images/semi-circle-chart.png" alt="SemiCircleChart" width="200"/><br/>
+      <img src="docs/images/semi-circle-chart.gif" alt="SemiCircleChart" width="200"/><br/>
       <b>SemiCircleChart</b>
     </td>
     <td align="center" width="33%">
-      <img src="docs/images/donut-gauge.png" alt="DonutGauge" width="200"/><br/>
+      <img src="docs/images/donut-gauge.gif" alt="DonutGauge" width="200"/><br/>
       <b>DonutGauge</b>
     </td>
   </tr>
   <tr>
     <td align="center" width="33%">
-      <img src="docs/images/semi-circle-gauge.png" alt="SemiCircleGauge" width="200"/><br/>
+      <img src="docs/images/semi-circle-gauge.gif" alt="SemiCircleGauge" width="200"/><br/>
       <b>SemiCircleGauge</b>
     </td>
     <td align="center" width="33%">
-      <img src="docs/images/grouped-stacked-bar-chart.png" alt="GroupedStackedBarChart" width="200"/><br/>
+      <img src="docs/images/grouped-stacked-bar-chart.gif" alt="GroupedStackedBarChart" width="200"/><br/>
       <b>GroupedStackedBarChart</b>
     </td>
     <td align="center" width="33%">
@@ -127,6 +127,10 @@ export default function App() {
 
 ### BarChart
 
+<p align="center">
+  <img src="docs/images/bar-chart.gif" alt="BarChart preview" width="320" />
+</p>
+
 Animated vertical bar chart with interactive bar selection.
 
 <details>
@@ -193,6 +197,10 @@ const [selectedBar, setSelectedBar] = useState(-1);
 ---
 
 ### GroupedBarChart
+
+<p align="center">
+  <img src="docs/images/grouped-bar-chart.gif" alt="GroupedBarChart preview" width="320" />
+</p>
 
 Display multiple bars per category for comparing values across groups.
 
@@ -266,6 +274,10 @@ interface GroupedBarData {
 ---
 
 ### StackedBarChart
+
+<p align="center">
+  <img src="docs/images/stacked-bar-chart.gif" alt="StackedBarChart preview" width="320" />
+</p>
 
 Stacked bar chart showing part-to-whole relationships with interactive segments.
 
@@ -357,6 +369,10 @@ interface StackedBarData {
 ---
 
 ### GroupedStackedBarChart
+
+<p align="center">
+  <img src="docs/images/grouped-stacked-bar-chart.gif" alt="GroupedStackedBarChart preview" width="320" />
+</p>
 
 Advanced chart combining grouped and stacked bar features for complex data visualization.
 
@@ -489,6 +505,10 @@ Advanced chart combining grouped and stacked bar features for complex data visua
 
 ### DonutChart
 
+<p align="center">
+  <img src="docs/images/donut-chart.gif" alt="DonutChart preview" width="320" />
+</p>
+
 Full circle chart with multiple segments and custom center content.
 
 <details>
@@ -552,6 +572,10 @@ const [selectedIndex, setSelectedIndex] = useState(-1);
 
 ### DonutGauge
 
+<p align="center">
+  <img src="docs/images/donut-gauge.gif" alt="DonutGauge preview" width="320" />
+</p>
+
 Full circle progress gauge for single progress values.
 
 <details>
@@ -588,6 +612,10 @@ Full circle progress gauge for single progress values.
 ---
 
 ### SemiCircleChart
+
+<p align="center">
+  <img src="docs/images/semi-circle-chart.gif" alt="SemiCircleChart preview" width="320" />
+</p>
 
 Half circle chart with multiple segments and custom center content.
 
@@ -640,6 +668,10 @@ Half circle chart with multiple segments and custom center content.
 ---
 
 ### SemiCircleGauge
+
+<p align="center">
+  <img src="docs/images/semi-circle-gauge.gif" alt="SemiCircleGauge preview" width="320" />
+</p>
 
 Half circle progress gauge for single progress values.
 
