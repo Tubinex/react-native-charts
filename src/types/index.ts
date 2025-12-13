@@ -345,3 +345,81 @@ export interface StackedBarChartProps {
 	deselectOnPressOutside?: boolean;
 	chartGestureRef?: React.RefObject<any>;
 }
+
+export interface AreaLineDataPoint {
+	x: number;
+	y: number;
+	label?: string;
+}
+
+export type AreaChartDataPoint = AreaLineDataPoint;
+export type LineChartDataPoint = AreaLineDataPoint;
+
+export interface AreaChartProps {
+	data: AreaLineDataPoint[];
+	width?: number;
+	height?: number;
+	fillColor?: string;
+	strokeColor?: string;
+	strokeWidth?: number;
+	smooth?: boolean;
+	animationDuration?: number;
+	onPointPress?: (index: number) => void;
+	selectedPointIndex?: number;
+	selectedPointRadius?: number;
+	selectionAnimationDuration?: number;
+	onPressOutside?: (event: ChartPressOutsideEvent) => void;
+	deselectOnPressOutside?: boolean;
+	chartGestureRef?: React.RefObject<any>;
+	xAxis?: AxisConfig;
+	yAxis?: AxisConfig;
+	minX?: number;
+	maxX?: number;
+	minY?: number;
+	maxY?: number;
+	showPoints?: boolean;
+	pointRadius?: number;
+	pointColor?: string;
+	explorer?: ExplorerConfig;
+}
+
+export interface ExplorerConfig {
+	enabled?: boolean;
+	lineColor?: string;
+	lineWidth?: number;
+	dotRadius?: number;
+	dotColor?: string;
+	inactiveColor?: string;
+	snapToPoint?: boolean;
+	showLine?: boolean;
+	showDot?: boolean;
+	onMove?: (index: number, point: AreaLineDataPoint) => void;
+	initialIndex?: number;
+}
+
+export interface LineChartProps {
+	data: LineChartDataPoint[];
+	width?: number;
+	height?: number;
+	strokeColor?: string;
+	strokeWidth?: number;
+	smooth?: boolean;
+	animationDuration?: number;
+	onPointPress?: (index: number) => void;
+	selectedPointIndex?: number;
+	selectedPointRadius?: number;
+	selectionAnimationDuration?: number;
+	onPressOutside?: (event: ChartPressOutsideEvent) => void;
+	deselectOnPressOutside?: boolean;
+	chartGestureRef?: React.RefObject<any>;
+	xAxis?: AxisConfig;
+	yAxis?: AxisConfig;
+	minX?: number;
+	maxX?: number;
+	minY?: number;
+	maxY?: number;
+	showPoints?: boolean;
+	pointRadius?: number;
+	pointColor?: string;
+	explorer?: ExplorerConfig;
+}

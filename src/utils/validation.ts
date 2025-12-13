@@ -1,4 +1,10 @@
-import type { BarData, GroupedBarData, RadialSegment, StackedBarData } from '../types';
+import type {
+	AreaLineDataPoint,
+	BarData,
+	GroupedBarData,
+	RadialSegment,
+	StackedBarData,
+} from '../types';
 
 export function validateBarData(data: BarData[]): void {
 	if (!Array.isArray(data)) {
@@ -171,4 +177,35 @@ export function validateNumericProp(
 			`${componentName}: ${propName} is negative (${value}). This may cause rendering issues.`
 		);
 	}
+}
+
+export function validateAreaLineData(data: AreaLineDataPoint[]): void {
+	if (!Array.isArray(data)) {
+		throw new Error('AreaChart/LineChart: data must be an array');
+	}
+
+	if (data.length === 0) {
+		console.warn('AreaChart/LineChart: data array is empty');
+		return;
+	}
+
+	data.forEach((point, index) => {
+		if (typeof point.x !== 'number' || isNaN(point.x) || !isFinite(point.x)) {
+			throw new Error(
+				`AreaChart/LineChart: data[${index}].x must be a valid finite number, got ${point.x}`
+			);
+		}
+
+		if (typeof point.y !== 'number' || isNaN(point.y) || !isFinite(point.y)) {
+			throw new Error(
+				`AreaChart/LineChart: data[${index}].y must be a valid finite number, got ${point.y}`
+			);
+		}
+
+		if (point.label !== undefined && typeof point.label !== 'string') {
+			console.warn(
+				`AreaChart/LineChart: data[${index}].label should be a string, got ${typeof point.label}`
+			);
+		}
+	});
 }

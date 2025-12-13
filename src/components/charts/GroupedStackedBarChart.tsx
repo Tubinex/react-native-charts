@@ -1,10 +1,10 @@
 import React, { useEffect, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Svg, { Path, Line } from 'react-native-svg';
-import Animated, {
+import { Canvas, Path, Line } from '@shopify/react-native-skia';
+import {
 	useSharedValue,
-	useAnimatedProps,
+	useDerivedValue,
 	withTiming,
 	Easing,
 	SharedValue,
@@ -23,8 +23,6 @@ import { validateGroupedStackedBarData } from '../../utils/validation';
 import { TOUCH_CONFIG, TOUCH_CONFIG_SQUARED } from '../../utils/constants';
 import { generateBarPath as generateBarPathUtil, parseCornerRadius } from '../../utils/pathGeneration';
 import { useChartAnimation } from '../../utils/hooks';
-
-const AnimatedPath = Animated.createAnimatedComponent(Path);
 
 interface StackedBarProps {
 	stack: {
@@ -255,7 +253,8 @@ const WholeStackBorder: React.FC<{
 	heightScale,
 	gapsHeight,
 }) => {
-	const animatedProps = useAnimatedProps(() => {
+	const path = useDerivedValue(() => {
+		'worklet';
 		const widthScaleValue = 1 + (widthScale - 1) * selectionProgress.value;
 		const heightScaleValue = 1 + (heightScale - 1) * selectionProgress.value;
 
@@ -286,7 +285,7 @@ const WholeStackBorder: React.FC<{
 			Math.min(radii.bottomRight - inset, insetMaxRadius)
 		);
 
-		const path = `
+		const pathString = `
             M ${insetX + insetTopLeftRadius} ${insetY}
             L ${insetX + insetWidth - insetTopRightRadius} ${insetY}
             ${insetTopRightRadius > 0 ? `Q ${insetX + insetWidth} ${insetY} ${insetX + insetWidth} ${insetY + insetTopRightRadius}` : ''}
@@ -299,21 +298,27 @@ const WholeStackBorder: React.FC<{
             Z
         `;
 
-		const opacity = animateBorder
+		return pathString;
+	}, [selectionProgress, x, y, width, height, borderWidth, cornerRadius, widthScale, heightScale, gapsHeight]);
+
+	const opacity = useDerivedValue(() => {
+		'worklet';
+		return animateBorder
 			? selectionProgress.value
 			: selectionProgress.value > 0.5
 				? 1
 				: 0;
-		return {
-			d: path,
-			opacity,
-			stroke: borderColor,
-			strokeWidth: borderWidth,
-			fill: 'none',
-		} as any;
-	});
+	}, [selectionProgress, animateBorder]);
 
-	return <AnimatedPath animatedProps={animatedProps} />;
+	return (
+		<Path
+			path={path}
+			color={borderColor}
+			style="stroke"
+			strokeWidth={borderWidth}
+			opacity={opacity}
+		/>
+	);
 };
 
 export const GroupedStackedBarChart: React.FC<GroupedStackedBarChartProps> = ({
@@ -745,24 +750,20 @@ export const GroupedStackedBarChart: React.FC<GroupedStackedBarChartProps> = ({
 			style={[styles.container, { width, height: height + chartPadding.top }]}
 		>
 			<GestureDetector gesture={tapGesture}>
-				<Svg width={width} height={height + chartPadding.top}>
+				<Canvas style={{ width, height: height + chartPadding.top }}>
 					{showYAxis &&
 						showYAxisGrid &&
 						yAxisValues.map((value, index) => {
 							const y = chartPadding.top + (index / yAxisTicks) * chartHeight;
 							return (
-								<React.Fragment key={`grid-${index}`}>
-									<Line
-										x1={chartPadding.left}
-										y1={y}
-										x2={width - chartPadding.right}
-										y2={y}
-										stroke={yAxisGridColor}
-										strokeWidth={yAxisGridWidth}
-										opacity={yAxisGridOpacity}
-										strokeDasharray={yAxis?.grid?.dashArray?.join(' ')}
-									/>
-								</React.Fragment>
+								<Line
+									key={`grid-${index}`}
+									p1={{ x: chartPadding.left, y }}
+									p2={{ x: width - chartPadding.right, y }}
+									color={yAxisGridColor}
+									strokeWidth={yAxisGridWidth}
+									opacity={yAxisGridOpacity}
+								/>
 							);
 						})}
 
@@ -827,28 +828,27 @@ export const GroupedStackedBarChart: React.FC<GroupedStackedBarChartProps> = ({
 								let barBaseColor = bar.color;
 
 								return (
-									<React.Fragment key={`${categoryIndex}-${barIndex}`}>
-										<AnimatedBar
-											x={x}
-											y={y}
-											width={barWidth}
-											height={barHeight}
-											color={barBaseColor}
-											selectedColor={itemSelectedColor}
-											animateColor={enableRecolor}
-											cornerRadius={cornerRadius}
-											delay={globalBarIndex * 50}
-											animationDuration={animationDuration}
-											isSelected={isSelected}
-											selectedBarWidthScale={selectedWidthScale}
-											selectedBarHeightScale={selectedHeightScale}
-											selectionAnimationDuration={selectionDuration}
-											showBorder={enableBorder}
-											borderWidth={itemBorderWidth}
-											borderColor={itemBorderColor}
-											animateBorder={itemBorderAnimate}
-										/>
-									</React.Fragment>
+									<AnimatedBar
+										key={`${categoryIndex}-${barIndex}`}
+										x={x}
+										y={y}
+										width={barWidth}
+										height={barHeight}
+										color={barBaseColor}
+										selectedColor={itemSelectedColor}
+										animateColor={enableRecolor}
+										cornerRadius={cornerRadius}
+										delay={globalBarIndex * 50}
+										animationDuration={animationDuration}
+										isSelected={isSelected}
+										selectedBarWidthScale={selectedWidthScale}
+										selectedBarHeightScale={selectedHeightScale}
+										selectionAnimationDuration={selectionDuration}
+										showBorder={enableBorder}
+										borderWidth={itemBorderWidth}
+										borderColor={itemBorderColor}
+										animateBorder={itemBorderAnimate}
+									/>
 								);
 							});
 						} else if ('stack' in item) {
@@ -883,7 +883,7 @@ export const GroupedStackedBarChart: React.FC<GroupedStackedBarChartProps> = ({
 
 						return null;
 					})}
-				</Svg>
+				</Canvas>
 			</GestureDetector>
 
 			{showYAxis && showYAxisLabels && (
@@ -1035,7 +1035,7 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
 		}
 	}, [isSelected, selectionAnimationDuration, sharedSelectionProgress]);
 
-	const animatedProps = useAnimatedProps(() => {
+	const path = useDerivedValue(() => {
 		'worklet';
 
 		let segmentProgress = ownProgress.value;
@@ -1056,7 +1056,7 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
 		const currentY = y + (height - currentHeight) - animatedYOffset;
 
 		if (currentHeight <= 0.01) {
-			return { d: '' };
+			return '';
 		}
 
 		const widthScale = 1 + (selectedBarWidthScale - 1) * selectionProgress.value;
@@ -1072,7 +1072,7 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
 
 		const radii = parseCornerRadius(cornerRadiusProp, scaledWidth, scaledHeight);
 
-		const path = generateBarPathUtil(
+		const pathString = generateBarPathUtil(
 			scaledX,
 			scaledY,
 			scaledWidth,
@@ -1083,15 +1083,33 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
 			radii.bottomRight
 		);
 
-		const fillColor =
-			animateColor && selectedColor
-				? interpolateColor(selectionProgress.value, [0, 1], [color, selectedColor])
-				: color;
+		return pathString;
+	}, [
+		ownProgress,
+		selectionProgress,
+		x,
+		y,
+		width,
+		height,
+		cornerRadiusProp,
+		selectedBarWidthScale,
+		selectedBarHeightScale,
+		isStackedSegment,
+		stackProgress,
+		segmentStartRatio,
+		segmentEndRatio,
+		yOffsetFromBelow,
+	]);
 
-		return { d: path, fill: fillColor } as any;
-	});
+	const fillColor = useDerivedValue(() => {
+		'worklet';
+		if (animateColor && selectedColor) {
+			return interpolateColor(selectionProgress.value, [0, 1], [color, selectedColor]);
+		}
+		return color;
+	}, [selectionProgress, animateColor, selectedColor, color]);
 
-	const borderAnimatedProps = useAnimatedProps(() => {
+	const borderPath = useDerivedValue(() => {
 		'worklet';
 
 		let segmentProgress = ownProgress.value;
@@ -1112,7 +1130,7 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
 		const currentY = y + (height - currentHeight) - animatedYOffset;
 
 		if (currentHeight <= 0.01 || !showBorder) {
-			return { d: '', strokeWidth: 0, opacity: 0 };
+			return '';
 		}
 
 		const widthScale = 1 + (selectedBarWidthScale - 1) * selectionProgress.value;
@@ -1146,7 +1164,7 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
 			Math.min(radii.bottomRight - inset, insetMaxRadius)
 		);
 
-		const path = generateBarPathUtil(
+		const pathString = generateBarPathUtil(
 			insetX,
 			insetY,
 			insetWidth,
@@ -1157,22 +1175,41 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
 			insetBottomRightRadius
 		);
 
-		const borderOpacity = animateBorder ? selectionProgress.value : isSelected ? 1 : 0;
-		return {
-			d: path,
-			strokeWidth: borderWidth,
-			opacity: borderOpacity,
-		};
-	});
+		return pathString;
+	}, [
+		ownProgress,
+		selectionProgress,
+		x,
+		y,
+		width,
+		height,
+		cornerRadiusProp,
+		selectedBarWidthScale,
+		selectedBarHeightScale,
+		isStackedSegment,
+		stackProgress,
+		segmentStartRatio,
+		segmentEndRatio,
+		yOffsetFromBelow,
+		showBorder,
+		borderWidth,
+	]);
+
+	const borderOpacity = useDerivedValue(() => {
+		'worklet';
+		return animateBorder ? selectionProgress.value : isSelected ? 1 : 0;
+	}, [selectionProgress, animateBorder, isSelected]);
 
 	return (
 		<>
-			<AnimatedPath animatedProps={animatedProps} />
+			<Path path={path} color={fillColor} style="fill" />
 			{showBorder && (
-				<AnimatedPath
-					stroke={borderColor}
-					fill="none"
-					animatedProps={borderAnimatedProps}
+				<Path
+					path={borderPath}
+					color={borderColor}
+					style="stroke"
+					strokeWidth={borderWidth}
+					opacity={borderOpacity}
 				/>
 			)}
 		</>

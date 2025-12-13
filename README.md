@@ -7,6 +7,7 @@ A collection of beautiful, customizable, and performant chart components for Rea
 
 ## Features
 
+- **High Performance** - Powered by React Native Skia for optimal rendering performance
 - **Beautiful Animations** - Smooth animations powered by Reanimated 2
 - **Interactive** - Built-in tap gesture support for charts
 - **Highly Customizable** - Extensive props for styling and behavior
@@ -65,6 +66,8 @@ A collection of beautiful, customizable, and performant chart components for Rea
 - **GroupedBarChart** - Multiple bars per category for comparing values across groups
 - **StackedBarChart** - Stacked segments showing part-to-whole relationships
 - **GroupedStackedBarChart** - Advanced chart combining grouped and stacked bar features
+- **AreaChart** - Filled area chart with smooth curves and interactive exploration
+- **LineChart** - Line chart with smooth curves and interactive data points
 - **DonutChart** - Full circle chart with multiple segments
 - **SemiCircleChart** - Half circle chart with multiple segments
 - **RadialChart** - Base component for custom radial charts
@@ -88,9 +91,9 @@ yarn add @tubinex/react-native-charts
 This library requires the following peer dependencies:
 
 ```bash
-npm install react-native-svg react-native-reanimated react-native-gesture-handler
+npm install @shopify/react-native-skia react-native-reanimated react-native-gesture-handler
 # or
-yarn add react-native-svg react-native-reanimated react-native-gesture-handler
+yarn add @shopify/react-native-skia react-native-reanimated react-native-gesture-handler
 ```
 
 **Important**: After installing `react-native-reanimated`, add the Reanimated plugin to your `babel.config.js`:
@@ -503,6 +506,147 @@ Advanced chart combining grouped and stacked bar features for complex data visua
 
 ---
 
+### AreaChart
+
+Filled area chart with smooth curves, interactive exploration, and customizable styling.
+
+<details>
+<summary><b>View Props & Example</b></summary>
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `data` | `{ x: number; y: number; label?: string }[]` | **required** | Array of data points with x and y coordinates |
+| `width` | `number` | `320` | Width of the chart in pixels |
+| `height` | `number` | `200` | Height of the chart in pixels |
+| `fillColor` | `string` | `'rgba(126, 217, 87, 0.25)'` | Fill color for the area |
+| `strokeColor` | `string` | `'rgba(126, 217, 87, 1)'` | Line color |
+| `strokeWidth` | `number` | `2` | Line thickness in pixels |
+| `smooth` | `boolean` | `true` | Use smooth curves instead of straight lines |
+| `animationDuration` | `number` | `1200` | Animation duration in milliseconds |
+| `showPoints` | `boolean` | `false` | Show data points on the line |
+| `pointRadius` | `number` | `4` | Radius of data points |
+| `pointColor` | `string` | `strokeColor` | Color of data points |
+| `selectedPointIndex` | `number` | `-1` | Index of currently selected point |
+| `selectedPointRadius` | `number` | `8` | Radius of selected point |
+| `onPointPress` | `(index: number) => void` | `undefined` | Callback when a point is pressed |
+| `onPressOutside` | `(event: ChartPressOutsideEvent) => void` | `undefined` | Called when a touch occurs outside the chart |
+| `deselectOnPressOutside` | `boolean` | `false` | Automatically clear selection on outside touches |
+| `xAxis` | `AxisConfig` | `undefined` | X-axis configuration |
+| `yAxis` | `AxisConfig` | `undefined` | Y-axis configuration |
+| `minX` | `number` | `auto` | Minimum X value for scaling |
+| `maxX` | `number` | `auto` | Maximum X value for scaling |
+| `minY` | `number` | `auto` | Minimum Y value for scaling |
+| `maxY` | `number` | `auto` | Maximum Y value for scaling |
+| `explorer` | `ExplorerConfig` | `undefined` | Interactive exploration configuration |
+
+**Explorer Config:**
+```typescript
+interface ExplorerConfig {
+  enabled: boolean;
+  snapToPoint?: boolean; // Default: true
+  showLine?: boolean; // Default: true
+  showDot?: boolean; // Default: true
+  lineColor?: string;
+  lineWidth?: number;
+  dotColor?: string;
+  dotRadius?: number;
+  inactiveColor?: string;
+  initialIndex?: number;
+  onMove?: (index: number, point: { x: number; y: number; label?: string }) => void;
+}
+```
+
+**Example:**
+```tsx
+<AreaChart
+  data={[
+    { x: 0, y: 120, label: 'Jan' },
+    { x: 1, y: 180, label: 'Feb' },
+    { x: 2, y: 150, label: 'Mar' },
+    { x: 3, y: 220, label: 'Apr' },
+    { x: 4, y: 190, label: 'May' },
+    { x: 5, y: 280, label: 'Jun' },
+  ]}
+  width={320}
+  height={200}
+  fillColor="rgba(126, 217, 87, 0.3)"
+  strokeColor="#7ED957"
+  strokeWidth={2}
+  smooth={true}
+  showPoints={true}
+  pointRadius={4}
+  explorer={{
+    enabled: true,
+    snapToPoint: true,
+    showLine: true,
+    showDot: true,
+    lineColor: '#7ED957',
+    dotRadius: 6,
+    inactiveColor: '#E5E7EB',
+    onMove: (index, point) => {
+      console.log(`Selected point ${index}:`, point);
+    },
+  }}
+  yAxis={{ show: true, grid: { show: true } }}
+  xAxis={{ show: true }}
+/>
+```
+</details>
+
+---
+
+### LineChart
+
+Line chart with smooth curves and interactive data points. Shares the same props as AreaChart but with a transparent fill.
+
+<details>
+<summary><b>View Props & Example</b></summary>
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `data` | `{ x: number; y: number; label?: string }[]` | **required** | Array of data points with x and y coordinates |
+| `width` | `number` | `320` | Width of the chart in pixels |
+| `height` | `number` | `200` | Height of the chart in pixels |
+| `strokeColor` | `string` | `'#7ED957'` | Line color |
+| `strokeWidth` | `number` | `2` | Line thickness in pixels |
+| `smooth` | `boolean` | `true` | Use smooth curves instead of straight lines |
+| `pointColor` | `string` | `strokeColor` | Color of data points |
+
+All other props are the same as [AreaChart](#areachart).
+
+**Example:**
+```tsx
+<LineChart
+  data={[
+    { x: 0, y: 120, label: 'Mon' },
+    { x: 1, y: 180, label: 'Tue' },
+    { x: 2, y: 150, label: 'Wed' },
+    { x: 3, y: 220, label: 'Thu' },
+    { x: 4, y: 190, label: 'Fri' },
+    { x: 5, y: 280, label: 'Sat' },
+    { x: 6, y: 210, label: 'Sun' },
+  ]}
+  width={320}
+  height={200}
+  strokeColor="#7ED957"
+  strokeWidth={3}
+  smooth={true}
+  showPoints={true}
+  pointRadius={5}
+  explorer={{
+    enabled: true,
+    snapToPoint: true,
+    onMove: (index, point) => {
+      console.log(`Point ${index}: ${point.y}`);
+    },
+  }}
+  yAxis={{ show: true }}
+/>
+```
+</details>
+
+---
+
 ### DonutChart
 
 <p align="center">
@@ -758,6 +902,11 @@ import type {
 	StackedBarChartProps,
 	GroupedStackedBarChartProps,
 
+	// Line & Area Charts
+	AreaChartProps,
+	LineChartProps,
+	ExplorerConfig,
+
 	// Radial Charts
 	ChartSegment,
 	DonutChartProps,
@@ -822,6 +971,6 @@ MIT © [Tubinex](https://github.com/Tubinex)
 ## Credits
 
 Built with:
-- [react-native-svg](https://github.com/software-mansion/react-native-svg)
+- [@shopify/react-native-skia](https://github.com/Shopify/react-native-skia)
 - [react-native-reanimated](https://github.com/software-mansion/react-native-reanimated)
 - [react-native-gesture-handler](https://github.com/software-mansion/react-native-gesture-handler)
