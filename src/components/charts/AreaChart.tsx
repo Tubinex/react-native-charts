@@ -108,11 +108,9 @@ export const AreaChart: React.FC<AreaChartProps> = ({
         const range = max - min;
         const roughInterval = range / (tickCount || 4);
 
-        // Get the magnitude (power of 10)
         const magnitude = Math.pow(10, Math.floor(Math.log10(roughInterval)));
         const normalizedInterval = roughInterval / magnitude;
 
-        // Choose a nice interval from common values
         let niceInterval: number;
         if (normalizedInterval <= 1) niceInterval = 1;
         else if (normalizedInterval <= 2) niceInterval = 2;
@@ -121,8 +119,6 @@ export const AreaChart: React.FC<AreaChartProps> = ({
         else niceInterval = 10;
 
         niceInterval *= magnitude;
-
-        // Calculate nice min and max
         const niceMin = Math.floor(min / niceInterval) * niceInterval;
         const niceMax = Math.ceil(max / niceInterval) * niceInterval;
 

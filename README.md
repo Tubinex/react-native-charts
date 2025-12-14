@@ -17,43 +17,47 @@ A collection of beautiful, customizable, and performant chart components for Rea
 
 <table>
   <tr>
-    <td align="center" width="33%">
+    <td align="center" width="20%">
       <img src="docs/images/bar-chart.gif" alt="BarChart" width="200"/><br/>
       <b>BarChart</b>
     </td>
-    <td align="center" width="33%">
+    <td align="center" width="20%">
       <img src="docs/images/grouped-bar-chart.gif" alt="GroupedBarChart" width="200"/><br/>
       <b>GroupedBarChart</b>
     </td>
-    <td align="center" width="33%">
+    <td align="center" width="20%">
       <img src="docs/images/stacked-bar-chart.gif" alt="StackedBarChart" width="200"/><br/>
       <b>StackedBarChart</b>
     </td>
-  </tr>
-  <tr>
-    <td align="center" width="33%">
-      <img src="docs/images/donut-chart.gif" alt="DonutChart" width="200"/><br/>
-      <b>DonutChart</b>
-    </td>
-    <td align="center" width="33%">
-      <img src="docs/images/semi-circle-chart.gif" alt="SemiCircleChart" width="200"/><br/>
-      <b>SemiCircleChart</b>
-    </td>
-    <td align="center" width="33%">
-      <img src="docs/images/donut-gauge.gif" alt="DonutGauge" width="200"/><br/>
-      <b>DonutGauge</b>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="33%">
-      <img src="docs/images/semi-circle-gauge.gif" alt="SemiCircleGauge" width="200"/><br/>
-      <b>SemiCircleGauge</b>
-    </td>
-    <td align="center" width="33%">
+    <td align="center" width="20%">
       <img src="docs/images/grouped-stacked-bar-chart.gif" alt="GroupedStackedBarChart" width="200"/><br/>
       <b>GroupedStackedBarChart</b>
     </td>
-    <td align="center" width="33%">
+    <td align="center" width="20%">
+      <img src="docs/images/area-chart.gif" alt="AreaChart" width="200"/><br/>
+      <b>AreaChart</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="20%">
+      <img src="docs/images/line-chart.gif" alt="LineChart" width="200"/><br/>
+      <b>LineChart</b>
+    </td>
+    <td align="center" width="20%">
+      <img src="docs/images/donut-chart.gif" alt="DonutChart" width="200"/><br/>
+      <b>DonutChart</b>
+    </td>
+    <td align="center" width="20%">
+      <img src="docs/images/semi-circle-chart.gif" alt="SemiCircleChart" width="200"/><br/>
+      <b>SemiCircleChart</b>
+    </td>
+    <td align="center" width="20%">
+      <img src="docs/images/donut-gauge.gif" alt="DonutGauge" width="200"/><br/>
+      <b>DonutGauge</b>
+    </td>
+    <td align="center" width="20%">
+      <img src="docs/images/semi-circle-gauge.gif" alt="SemiCircleGauge" width="200"/><br/>
+      <b>SemiCircleGauge</b>
     </td>
   </tr>
 </table>
@@ -508,6 +512,10 @@ Advanced chart combining grouped and stacked bar features for complex data visua
 
 ### AreaChart
 
+<p align="center">
+  <img src="docs/images/area-chart.gif" alt="AreaChart preview" width="320" />
+</p>
+
 Filled area chart with smooth curves, interactive exploration, and customizable styling.
 
 <details>
@@ -596,6 +604,10 @@ interface ExplorerConfig {
 ---
 
 ### LineChart
+
+<p align="center">
+  <img src="docs/images/line-chart.gif" alt="LineChart preview" width="320" />
+</p>
 
 Line chart with smooth curves and interactive data points. Shares the same props as AreaChart but with a transparent fill.
 
