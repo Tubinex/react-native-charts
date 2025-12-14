@@ -1,6 +1,6 @@
 {
 	"name": "@tubinex/react-native-charts",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"description": "A collection of beautiful, customizable chart components for React Native",
 	"main": "src/index.ts",
 	"types": "dist/index.d.ts",
